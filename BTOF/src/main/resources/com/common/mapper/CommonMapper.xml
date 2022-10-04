@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.common.mapper.CommonMapper">
+  
+   
+  <insert id="register">
+  insert into users(id,pw,tell,nick,birth)
+  values(#{id},#{pw},#{tel},#{nick},#{birth})
+  </insert>
+  
+  <select id="idAvail" resultType="int">
+  	select count(*) from users where ID = #{id}
+  </select>
+  
+  <select id="nickAvail" resultType="int">
+  	select count(*) from users where NICK= #{nick}
+  </select>
+  
+  <select id="login" resultType="int">
+  select count(*) from users where id=#{id} and pw=#{pw} 
+  </select>
+  
+  		<select id="idFind" resultType="int">
+  select count(*) from users where tell=#{tel} and NICK=#{nick}				
+  		
+  		</select>
+  <select id="idCheck" resultType="String">
+  select id from users where tell=#{tel} and NICK=#{nick}
+  </select>
+  
+  <select id="pwCheck" resultType="int">
+  select count(*) from users where id=#{id} and tell=#{tel}
+  </select>
+
+	<select id="getprice" resultType="int">
+	select price from auction where prod_name=#{prod_name}
+	</select>
+	
+  	<update id="renewprice">
+  	update auction set price =#{price}, id=#{id} where prod_name=#{prod_name} 
+  	</update>
+  
+  	<select id="getBalance" resultType="int">
+  	
+  	select wallet from auction where id=#{id}
+  	
+  	</select>
+  	<update id="upArtist">
+  	update users set power= 'A' where id=#{id}
+  	</update>
+  
+  <update id="upMaster">
+  	update users set power= 'M' where id=#{id}
+  </update>
+  	<select id="getUserPower" resultType="String">
+  		select power from users where id=#{id}
+  	</select>
+  	
+  	<select id="getPass" resultType="String">
+  	
+  		select artist_pass from artist where artist_nick=#{nick}
+  	</select>
+  	<delete id="deleteAp">
+  		delete from artist where artist_nick=#{nick}
+  	</delete>
+  
+   </mapper>

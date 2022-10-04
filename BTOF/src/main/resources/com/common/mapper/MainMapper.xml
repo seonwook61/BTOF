@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.common.mapper.MainMapper">
+
+	<sql id="criteria">
+		<trim prefix="(" suffix=") AND" prefixOverrides="AND">
+			<foreach item="type" collection="typeArr">
+				<trim>
+					<choose>
+						<when test="type == 'A'.toString()">
+							<trim prefixOverrides="or">
+								<foreach item="prod_artist" collection="artistArr">
+									<trim prefix="or">
+										prod_artist =#{prod_artist}
+									</trim>
+								</foreach>
+							</trim>
+							
+						</when>
+						<!-- 상품 태그 검색 -->
+						<when test="type == 'T'.toString()">
+							<trim prefixOverrides="or">
+								<foreach item="prod_tag" collection="tagArr">
+									<trim prefix="or">
+										prod_tag =#{prod_tag}
+									</trim>
+								</foreach>
+							</trim>
+						</when>
+						<!-- 상품명 검색 -->
+						<when test="type == 'N'.toString()">
+							prod_name like '%' || #{keyword} || '%'
+						</when>
+
+					</choose>
+				</trim>
+			</foreach>
+
+		</trim>
+	</sql>
+	
+	<!-- 상품 검색 -->
+	<select id="getGoodsList" resultType="MainVO">
+	
+		<![CDATA[
+		    select * from (
+                select rownum as rn, prod_no, prod_name, prod_div, prod_descr,
+                prod_tag, prod_file, prod_like, prod_artist, prod_pass,
+                prod_regist_day
+                from product
+                where 
+	    ]]>
+	    
+	    <include refid="criteria"></include>
+	    
+	    <![CDATA[
+	    		        
+		        rownum <= #{pageNum} * #{amount} 
+	        	)
+	        where rn > (#{pageNum} -1) * #{amount}
+		]]>	  		
+	
+	</select>
+	
+	<!-- 상품 총 개수 -->
+	<select id="goodsGetTotal" resultType="int">
+	
+		select count(*) from product
+		where
+		<include refid="criteria"></include> 
+		prod_no >0
+		
+	</select>
+	
+	<!-- 작가 이름 리스트 요청 -->
+	<select id="getArtistList" resultType="String">
+		select artist_name from artist where artist_Name like '%' || #{keyword} || '%'
+	</select>
+	
+	<!-- 상품 태그 리스트 요청 -->
+	<select id="getTagList" resultType="String">
+		select prod_tag from product where prod_tag like '%' || #{keyword} || '%'
+	</select>
+	
+	
+	
+	
+
+	<!-- 메인화면 보여줄 전체 -->
+	<select id="showList" resultType="MainVO">
+		select  prod_no, prod_name, prod_div, prod_descr,
+                prod_tag, prod_file, prod_like, prod_artist, prod_pass,
+                prod_regist_day, prod_pass_day
+                from product	
+	</select>
+	
+	<select id="get" resultType="MainVO">
+		select * from product where prod_no=#{prod_no}
+	</select>
+	
+	<insert id="Poincheck">
+		insert into attend (att_id) values (#{id)}) 
+	</insert>
+	
+	<select id ="Attendance" resultType="com.common.domain.AttendVO">
+		select * from attend
+	</select>
+	
+	
+<resultMap id="calendarRM" type="com.common.domain.Calendar">
+	<id property="calendarNo" column="CALENDAR_NO" />
+	<result property="calendarTitle" column="CALENDAR_TITLE" />
+	<result property="calendarMemo" column="CALENDAR_MEMO" />
+	<result property="calendarStart" column="CALENDAR_START" />
+	<result property="calendarEnd" column="CALENDAR_END" />
+</resultMap>
+	
+	<select id="calendarList" resultMap="calendarRM">
+		select * from calendar
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- 아이디로 닉네임 가져오기 -->
+	<select id="getOwnWithId" resultType="String">
+		select nick from users where id=#{id}
+	</select>
+	
+</mapper>

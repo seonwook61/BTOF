@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.admin.mapper.AdminMapper">
+  
+  	<select id="getInqList" resultType="InquiryVO">
+  	
+  		select * from inquiry
+  	</select>
+  	<select id="getInq" resultType="InquiryVO">
+  		select * from inquiry where id=#{id}
+  	</select>
+  		<update id="updateInq">
+  			update inquiry set reply=#{reply} where id=#{id}
+  		</update>
+  		<select id="getListWithPaging" resultType="AproductVO">
+		<![CDATA[
+			select * from product
+	    ]]>
+	</select>
+	
+	<select id="read" resultType="AproductVO">
+		<!-- select * from product where prod_no=#{prod_no}-->
+		select a.prod_no, a.prod_name, a.prod_div, a.prod_descr, a.prod_tag, a.prod_file, a.prod_like, a.prod_artist, a.prod_pass, a.prod_regist_day, a.prod_pass_day, 
+		b.prod_dtl_price, b.prod_dtl_serial, b.prod_dtl_sn, b.prod_dtl_own from product a, product_dtl b where a.prod_no=#{prod_no} and a.prod_no=b.prod_dtl_no
+	</select>
+  
+  	<update id="updatePass">
+  		update product set prod_pass = 'T'
+		where prod_no = #{prod_no}
+  	</update>
+  	
+  	<update id="updateRefues">
+  		update product set prod_pass = 'D'
+		where prod_no = #{prod_no}
+  	</update>
+  	
+  	<select id="bringPro" resultType="AproductVO">
+  	
+  		select prod_name,prod_artist,prod_price,prod_div from product where prod_no=#{prod_no}
+  	
+  	</select>
+  	
+  		
+ </mapper>

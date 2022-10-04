@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.product.mapper.ProductMapper">
+
+	<select id="getList" resultType="productVO">
+		<![CDATA[
+			select * from product where prod_no > 0
+		]]>
+	</select>
+	
+	<select id="getListWithCate" resultType="productVO">
+		select * from product where prod_tag = #{prod_tag}
+	</select>
+	
+	<select id="getListWithArtist" resultType="productVO">
+		select * from product where prod_artist = #{prod_artist}
+	</select>
+	
+	<sql id="criteria">
+		<trim prefix="where" prefixOverrides="or">
+ 			<foreach item="type" collection="typeArr">
+ 				<trim prefix="or">
+					<choose>
+						<when test="type == 'T'.toString()">
+							prod_name like '%'||#{keyword}||'%'
+						</when>
+						<when test="type == 'C'.toString()">
+							prod_name like '%'||#{keyword}||'%'
+						</when>	
+						<when test="type == 'W'.toString()">
+							prod_artist like '%'||#{keyword}||'%'
+						</when>							
+					</choose>					
+				</trim>
+			</foreach>
+		</trim>
+	</sql>
+	
+	
+	<select id="getListWithPaging" resultType="productVO">
+		<![CDATA[
+			select * from product
+	    ]]>
+	</select>
+	
+	
+	<!-- 전체 글의 개수 가져오기 : 전체 일때랑 검색했을때 두방법 모두 사용  -->
+	<select id="getTotalCount" resultType="int">
+		select count(*) from product 
+		<include refid="criteria"></include>
+	</select>
+	
+	
+	<!-- 글 한개 가져오기  >
+	<select id="readDtl" resultType="productDtlVO">
+		select * from product_dtl where prod_dtl_no=#{prod_dtl_no}
+	</select-->
+	
+	<select id="read" resultType="productVO">
+		<!-- select * from product where prod_no=#{prod_no}-->
+		select a.prod_no, a.prod_name, a.prod_div, a.prod_descr, a.prod_tag, a.prod_file, a.prod_like, a.prod_artist, a.prod_pass, a.prod_regist_day, a.prod_pass_day, 
+		b.prod_dtl_price, b.prod_dtl_serial, b.prod_dtl_sn, b.prod_dtl_own from product a, product_dtl b where a.prod_no=#{prod_no} and a.prod_no=b.prod_dtl_no
+	</select>
+	
+	<update id="sellProd">
+		update product_dtl set prod_dtl_own=#{prod_dtl_own} where prod_dtl_no=#{prod_no}
+	</update>
+	
+	<!-- 오너 가져오기 -->
+	<select id="getOwner" resultType="String">
+		select prod_dtl_own from product_dtl where prod_dtl_no=#{prod_no}
+	</select>
+	<select id="getOwnerCount" resultType="int">
+		select count(*) from test_dtl2 where prod_dtl_owner=#{id}
+	</select>
+	
+	<!-- 로그인한 아이디로 닉네임 가져오기 -->
+	<select id="getIdUser" resultType="String">
+		select nick from users where id=#{id}
+	</select>
+	
+	<select id="getListWithOwn" resultType="productVO">
+		select * from product_dtl where prod_dtl_own = #{prod_dtl_own}
+	</select>
+	
+	<select id="getSales" resultType="String">
+		select prod_dtl_sales from product_dtl where prod_dtl_no=#{prod_no}
+	</select>
+	
+	<!-- select id="getMyListAllSerial" resultType="productVO">
+		select a.* from product a, product_dtl b where b.prod_dtl_own=#{prod_dtl_own} and a.prod_name=b.prod_dtl_name and a.prod_artist=b.prod_dtl_artist order by b.prod_dtl_registday desc
+	</select-->
+	<!-- 광범님 시작 -->
+		<select id="getSellList" resultType="SellStatusVO"> 
+		 select b.* from (select rownum r, a.* from (select * from test_dtl2 where prod_dtl_artist=#{artist} and prod_dtl_name =#{prod_name} order by prod_dtl_registday asc) a ) b
+		</select> 
+		 
+		 <select id="getBidPrice" resultType="SellStatusVO">
+		 select * from 	test_dtl2 where prod_dtl_no=#{prod_dtl_no}
+		 </select>
+		<select id="getProd_dtl" resultType="SellStatusVO">
+		 select * from test_dtl2 where prod_dtl_no=#{prod_dtl_no}
+		 </select>
+		 <update id="changeBid">
+		 
+		 	update test_dtl2 set prod_dtl_bid_price = #{prod_dtl_bid_price}, prod_dtl_owner=#{id} where prod_dtl_artist = #{prod_dtl_artist} and prod_dtl_name=#{prod_dtl_name}
+	
+		 </update>
+			<select id="getBalance" resultType="int">
+				select wallet from users where id=#{id}
+			</select>
+			<update id="deduct">
+			
+				update users set wallet=#{leftover} where id=#{id}
+			</update>
+			<update id="changeOwner">
+			
+				update test_dtl2 set prod_dtl_owner = #{id} where prod_dtl_no=#{prod_dtl_no}
+			</update>
+		
+			<select id="findSeller" resultType="String">
+				select prod_dtl_owner from test_dtl2 where prod_dtl_no = #{buyer_tel}
+			</select>
+			<update id="updateOwner">
+				update test_dtl2 set prod_dtl_owner=#{buyer_name},prod_dtl_price=#{paid_amount} where prod_dtl_no=#{buyer_tel}
+			
+			</update>
+			<insert id="insHistory">
+				insert into history(name,seller,buyer_name,paid_amount,buyer_tel)values(#{name},#{seller},#{buyer_name},#{paid_amount},#{buyer_tel})
+			</insert>
+	<!-- 광범님 끝 -->	
+	<select id="getSellListWithF" resultType="Integer">
+	
+		select prod_dtl_no from test_dtl2 where prod_dtl_artist=#{prod_artist} and prod_dtl_name=#{prod_name} and prod_dtl_owner=#{prod_dtl_owner} order by prod_dtl_registday asc
+
+	</select>
+	<select id="getSN" resultType="Integer" >
+		select b.* from (select rownum r from (select * from test_dtl2 where prod_dtl_artist=#{prod_artist} and prod_dtl_name=#{prod_name} and prod_dtl_owner=#{prod_dtl_owner} order by prod_dtl_registday asc) a ) b
+	</select>
+	
+	<update id="updateSales">
+		update test_dtl2 set prod_dtl_sales='T' where prod_dtl_no=#{sn}
+	</update>
+	<update id="updatePrice">
+		update test_dtl2 set prod_dtl_price=#{price} where prod_dtl_no=#{sn}
+	</update>
+	
+	<select id="getTF" resultType="String">
+		select prod_dtl_sales from test_dtl2 where prod_dtl_artist=#{prod_artist} and prod_dtl_name=#{prod_name} and prod_dtl_owner=#{prod_dtl_owner} order by prod_dtl_registday asc
+	</select>
+	
+	<update id="updateAucSales">
+		update test_dtl2 set prod_dtl_bid='T', prod_dtl_sales='T' where prod_dtl_no=#{sn}
+	</update>
+	
+	<update id="updateBidPrice">
+		update test_dtl2 set prod_dtl_bid_price=#{startPrice} where prod_dtl_no=#{sn}
+	</update>
+	
+	<update id="updateEndDay">
+		update test_dtl2 set prod_dtl_startday=sysdate, prod_dtl_endday=#{endDay} where prod_dtl_no=#{sn}
+	</update>
+
+</mapper>
+			
+			

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.artist.mapper.ArtistMapper">
+ 
+ 	
+
+	<!-- 랭크 리스트 가져오기   -->
+	<select id="getRankList" resultType="artistVO">
+		SELECT a.artist_name, a.artist_nick, a.artist_id, a.artist_url,  a.artist_pass, a.artist_regist_date, a.artist_pass_date, a.artist_total_wish, 
+		b.prod_name, b.prod_div, b.prod_descr, b.prod_tag, b.prod_file, b.prod_like, b.prod_artist, b.prod_pass, b.prod_regist_day, b.prod_pass_day, b.prod_no 
+		from artist a, product b where a.artist_name=b.prod_artist
+	</select> 
+	
+	<!-- 좋아요별 랭크 리스트 가져오기 -->
+	<select id="getRankListByLikes" resultType="artistVO">
+		SELECT a.artist_name, a.artist_nick, a.artist_id, a.artist_url,  a.artist_pass, a.artist_regist_date, a.artist_pass_date, a.artist_total_wish, 
+		b.prod_name, b.prod_div, b.prod_descr, b.prod_tag, b.prod_file, b.prod_like, b.prod_artist, b.prod_pass, b.prod_regist_day, b.prod_pass_day, b.prod_no
+		from artist a, product b where a.artist_name=b.prod_artist order by prod_like desc
+	</select> 
+	
+	<!-- 시간 별로 가져오기 -->
+	<select id="getListByStartDay" resultType="artistVO">
+		select * from artist a, product b where a.artist_name = b.prod_artist order by prod_pass_day desc
+	</select>	 
+	
+	<!-- 작가별 좋아요 수   -->
+	<select id="LikesPerArtist" resultType="int">
+		select count(prod_like) from product where prod_artist=#{artist_name}
+	</select>	 
+ 
+ 	<!-- 아티스트 정보 가져오기 --> 
+ 	<select id="getArtistInfo" resultType="artistVO">
+		SELECT a.artist_name, a.artist_nick, a.artist_id, a.artist_url, a.artist_introd, a.artist_pass, a.artist_regist_date, a.artist_pass_date, a.artist_total_wish, 
+		b.prod_name, b.prod_div, b.prod_descr, b.prod_tag, b.prod_file, b.prod_like, b.prod_artist, b.prod_pass, b.prod_regist_day, b.prod_pass_day 
+		from artist a, product b where prod_artist=#{id} and a.artist_name=b.prod_artist
+	</select>	 
+ 
+ 
+</mapper>
